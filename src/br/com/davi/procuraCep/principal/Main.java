@@ -4,39 +4,36 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Scanner;
 
-import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 
-import br.com.davi.procuraCep.conexoes.ConexaoApi;
+import br.com.davi.procuraCep.conexoes.ConsultaCep;
 import br.com.davi.procuraCep.exceptions.InvalidCepException;
 import br.com.davi.procuraCep.modelos.Endereco;
 
 public class Main {
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, InvalidCepException {
 
 		Scanner scann = new Scanner(System.in);
-
-		String cep = null;
+		ConsultaCep consultaCep = new ConsultaCep();
 
 		while (true) {
-			Endereco endereco = null;
 
 			try {
-				cep = perguntaCep();
-				endereco = pesquisaCep(cep);
+
+				String cep = perguntaCep();
+				Endereco endereco = consultaCep.buscaEndereco(cep);
 				System.out.println("Endereço procurado : " + endereco + "\n\n");
 
-			} catch (InvalidCepException e) {
-				System.out.println("O cep digitado na foi encontrado, tente novamente");
-				e.getMessage();
-
-			} catch (IOException | URISyntaxException | InterruptedException e) {
-
-				System.out.println("Não foi possivel se conectar com a api, tente novamente mais tarde");
-				System.out.println(e.getMessage());
+			} catch ( InvalidCepException e ) {
+				System.out.println( "erro "+e.getMessage());
+			}
+			catch ( RuntimeException g ){
+				System.out.println(g.getMessage());
 			}
 
-			int verificador = verificaSaida(scann);
+			int verificador = verificaSaidaDoLoop(scann);
 			if (verificador == 2)
 				break;
 
@@ -44,7 +41,7 @@ public class Main {
 		System.out.println("Programa finalizado");
 	}
 
-	private static int verificaSaida(Scanner scann) {
+	private static int verificaSaidaDoLoop(Scanner scann) {
 		int verificador = 0;
 		while (true) {
 			System.out.println("1 Para pesquisar outro CEP \n2 Para encerrar a aplicação");
@@ -71,16 +68,6 @@ public class Main {
 		}
 
 		return cep;
-	}
-
-	public static Endereco pesquisaCep(String cep)
-			throws IOException, InterruptedException, URISyntaxException, InvalidCepException {
-		Gson gson = new Gson();
-		ConexaoApi conexao = new ConexaoApi(cep);
-		String enderecoJson = conexao.getEnderecoJson();
-
-		return gson.fromJson(enderecoJson, Endereco.class);
-
 	}
 
 }
