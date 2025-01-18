@@ -1,2 +1,8 @@
 .metadata/
 *.class
+.classpath
+.project
+.settings/
+*.log
+*.temp
+*.tmp
